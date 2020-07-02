@@ -19,3 +19,7 @@ require (
 	moul.io/http2curl v1.0.0 // indirect
 	xorm.io/core v0.7.3
 )
+
+replace (
+    github.com/henson/proxypool => ../coding.net/tedcy/proxypool
+)

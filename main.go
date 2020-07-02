@@ -5,6 +5,7 @@ import (
 	"runtime"
 	"sync"
 	"time"
+	"fmt"
 
 	"github.com/henson/proxypool/api"
 	"github.com/henson/proxypool/getter"
@@ -14,7 +15,6 @@ import (
 )
 
 func main() {
-
 	//init the database
 	initial.GlobalInit()
 
@@ -71,6 +71,11 @@ func run(ipChan chan<- *models.IP) {
 	for _, f := range funs {
 		wg.Add(1)
 		go func(f func() []*models.IP) {
+			defer func() {
+				if err := recover();err != nil {
+					fmt.Println(err)
+				}
+			}()
 			temp := f()
 			//log.Println("[run] get into loop")
 			for _, v := range temp {

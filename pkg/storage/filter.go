@@ -4,6 +4,7 @@ import (
 	//"fmt"
 	"sync"
 	"time"
+	"strings"
 
 	sj "github.com/bitly/go-simplejson"
 	"github.com/go-clog/clog"
@@ -24,10 +25,10 @@ func CheckIP(ip *models.IP) bool {
 	var testIP string
 	if ip.Type2 == "https" {
 		testIP = "https://" + ip.Data
-		pollURL = "https://httpbin.org/get"
+		pollURL = "https://www.j3dh.com"
 	} else {
 		testIP = "http://" + ip.Data
-		pollURL = "http://httpbin.org/get"
+		pollURL = "http://www.j3dh.com"
 	}
 	clog.Info(testIP)
 	begin := time.Now()
@@ -41,7 +42,7 @@ func CheckIP(ip *models.IP) bool {
 	if resp.StatusCode == 200 {
 		//harrybi 20180815 判断返回的数据格式合法性
 		_, err := sj.NewFromReader(resp.Body)
-		if err != nil {
+		if err != nil && !strings.Contains(err.Error(), "invalid") {
 			clog.Warn("[CheckIP] testIP = %s, pollURL = %s: Error = %v", testIP, pollURL, err)
 			return false
 		}
