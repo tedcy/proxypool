@@ -26,3 +26,4 @@ _testmain.go
 *.log
 proxypool
 peers.conf
+stdout
