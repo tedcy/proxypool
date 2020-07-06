@@ -7,7 +7,8 @@ import threading
 import numpy as np
 
 import sys
-sys.stdout = open('./create_peer.log', "a")
+tablename = sys.argv[1]
+sys.stdout = open('./create_peer_' + tablename + '.log', "a")
 
 used_time_list = []
 valid_list = []
@@ -44,13 +45,13 @@ def threadpool_callback(workWorkRequest, result):
     total_count += 1
     mutex.release()
 
-test_url = 'https://tieba.baidu.com/'
+test_url = 'http://c.tieba.baidu.com/'
 timeout = 20
 
 def testproxyonce(addr):
     try:
         proxies = {
-            'https': addr,
+            'http': addr,
         }
         start_time = time.time()
         r = requests.get(test_url, timeout=timeout, proxies=proxies)
@@ -68,7 +69,7 @@ def testproxyonce(addr):
         return False, None
 
 def testproxy(addr):
-    count = 10
+    count = 2
     sum_time = 0
     ok_count = 0
     resultOk = True
@@ -82,7 +83,7 @@ def testproxy(addr):
     mean_time = 0
     if ok_count:
         mean_time = sum_time / ok_count
-    if mean_time > 1.5:
+    if mean_time > 3:
         resultOk = False
     return addr, resultOk, mean_time
 
@@ -100,7 +101,7 @@ try:
     )
 
     cursor = conn.cursor()
-    cursor.execute('select * from ip order by id desc')
+    cursor.execute('select * from ' + tablename + ' order by id desc limit 1000')
     results = cursor.fetchall()
 
     addr_list = []
@@ -117,7 +118,7 @@ try:
      
     if len(valid_list) == 0:
         raise(Exception('wtf'))
-    filename = 'peers.conf'
+    filename = tablename + '.conf'
     with open(filename, 'w') as file_object:
         for u in valid_list:
             addr = u.split(':')
@@ -127,7 +128,7 @@ try:
             file_object.write(ip)
             file_object.write(' parent ')
             file_object.write(port)
-            file_object.write(' 0 no-query weighted-round-robin weight=1 connect-fail-limit=1 allow-miss\n')
+            file_object.write(' 0 no-query no-digest weighted-round-robin weight=1 connect-fail-limit=1 allow-miss\n')
     print('-----------------end------------------')
     sys.stdout.flush()
 except Exception as e:
